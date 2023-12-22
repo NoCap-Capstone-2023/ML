@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 import cv2
 import numpy as np
+import os
+import matplotlib.pyplot as plt
 import pickle
 import tensorflow as tf
 
@@ -26,12 +28,8 @@ def predict():
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-    # Apply morphological operations to clean up the image
-    kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
-
     # Find contours
-    contours, _ = cv2.findContours(opening, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Sort contours based on x-coordinate to arrange left to right
     contours = sorted(contours, key=lambda x: cv2.boundingRect(x)[0])
@@ -73,13 +71,6 @@ def predict():
         if i < len(segmented_regions) - 1:
             predicted_text += " "# Append the predicted label to form the predicted text
 
-    # Print or use the predicted text
-    # print("Predicted Text:", predicted_text)
-    # Rest of your image processing code goes here...
-
-    # Assuming the code to process and predict text is the same as in the provided code
-
-    # Return the predicted text as JSON
     return predicted_text
 
 @app.route('/')
